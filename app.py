@@ -9,7 +9,7 @@ app = Flask(__name__, template_folder='.')
 
 app.secret_key = "secret_key_for_session" 
 
-# ตั้งค่า Database
+# ตั้งค่า Database และ Path หลักของโปรเจค
 BASE_DIR = os.path.abspath(os.path.dirname(__file__))
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(BASE_DIR, 'project_data.db')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
@@ -57,17 +57,23 @@ def log_history(action, project_name):
     db.session.add(new_log)
     db.session.commit()
 
-# --- ROUTES พิเศษ (เพิ่มตรงนี้เพื่อแก้ปัญหา CSS) ---
+# --- ROUTES พิเศษ (แก้ไขเรียบร้อยแล้ว!) ---
+# ใช้ BASE_DIR แทน '.' เพื่อให้ Server หาไฟล์เจอแน่นอน 100%
 
 @app.route('/style.css')
 def serve_css():
-    # ส่งไฟล์ style.css จากโฟลเดอร์ปัจจุบัน
-    return send_from_directory('.', 'style.css')
+    # ส่งไฟล์ style.css โดยอ้างอิงจากที่อยู่ไฟล์ app.py โดยตรง
+    return send_from_directory(BASE_DIR, 'style.css')
 
 @app.route('/script.js')
 def serve_js():
-    # ส่งไฟล์ script.js จากโฟลเดอร์ปัจจุบัน
-    return send_from_directory('.', 'script.js')
+    # ส่งไฟล์ script.js โดยอ้างอิงจากที่อยู่ไฟล์ app.py โดยตรง
+    return send_from_directory(BASE_DIR, 'script.js')
+
+@app.route('/uploads/<filename>')
+def download_file(filename):
+    # อันนี้ถูกต้องอยู่แล้ว (ใช้ app.config['UPLOAD_FOLDER'])
+    return send_from_directory(app.config['UPLOAD_FOLDER'], filename)
 
 # --- ROUTES ปกติ ---
 
@@ -137,10 +143,6 @@ def delete_project(id):
     log_history("ลบโปรเจค", name)
     flash('ลบข้อมูลเรียบร้อย', 'success')
     return redirect(url_for('projects'))
-
-@app.route('/uploads/<filename>')
-def download_file(filename):
-    return send_from_directory(app.config['UPLOAD_FOLDER'], filename)
 
 if __name__ == '__main__':
     with app.app_context():
