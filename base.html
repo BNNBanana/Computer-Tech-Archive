@@ -4,14 +4,15 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ระบบเก็บข้อมูลโครงงานคอมพิวเตอร์</title>
-    
-    <!-- แก้ไขจุดที่ 1: เรียก CSS ผ่านฟังก์ชัน serve_css -->
-    <link rel="stylesheet" href="{{ url_for('serve_css') }}">
-    
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <!-- Google Fonts: Sarabun -->
     <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;700&display=swap" rel="stylesheet">
+    <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 <body>
+
+    <!-- ข้อ 2: Navbar -->
     <nav class="navbar">
         <div class="nav-brand">
             <i class="fas fa-database"></i> Computer Tech Archive
@@ -26,6 +27,7 @@
         </div>
     </nav>
 
+    <!-- Flash Messages -->
     {% with messages = get_flashed_messages(with_categories=true) %}
       {% if messages %}
         {% for category, message in messages %}
@@ -38,12 +40,12 @@
         {% block content %}{% endblock %}
     </div>
 
+    <!-- ข้อ 7: Footer -->
     <footer>
         <p>Developed by: Anattikorn Makchongdee</p>
         <p>Contact: bnntv2005@gmail.com | Facebook: Anattikorn Makchongdee</p>
     </footer>
 
-    <!-- แก้ไขจุดที่ 2: เรียก JS ผ่านฟังก์ชัน serve_js -->
-    <script src="{{ url_for('serve_js') }}"></script>
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
 </body>
 </html>
