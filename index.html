@@ -1,0 +1,124 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="hero-section">
+    <h1><i class="fas fa-folder-open"></i> เว็บเก็บเล่มรายงาน-คู่มือ-โค้ดโครงงาน</h1>
+    <h2>เทคโนโลยีคอมพิวเตอร์</h2>
+    <p style="margin-top: 20px; line-height: 1.6;">
+        เป็นโปรแกรม Web Application สำหรับจัดเก็บรวบรวมข้อมูลโครงงาน (Project) ของนักเรียนแผนกวิชาคอมพิวเตอร์ 
+        เพื่อเป็นฐานข้อมูลองค์ความรู้ (Knowledge Base) ที่รวบรวมทั้งเล่มรายงาน คู่มือการใช้งาน และซอร์สโค้ด 
+    </p>
+    <div style="margin-top: 15px; text-align: left; background: rgba(255,255,255,0.1); padding: 15px; border-radius: 10px;">
+        <strong><i class="fas fa-info-circle"></i> วิธีการใช้งาน:</strong>
+        <ol>
+            <li>กดปุ่ม "เพิ่มโปรเจค" ด้านล่าง</li>
+            <li>กรอกข้อมูลรายละเอียดให้ครบถ้วน</li>
+            <li>กด "ตกลง" เพื่อบันทึกข้อมูลเข้าระบบ</li>
+            <li>สามารถดูและแก้ไขข้อมูลได้ที่เมนู "โปรเจคที่มีอยู่"</li>
+        </ol>
+    </div>
+</div>
+
+<div class="add-btn-container">
+    <button onclick="openModal()" class="btn-add-large">
+        <i class="fas fa-plus-circle"></i> เพิ่มโปรเจค
+    </button>
+</div>
+
+<div id="addProjectModal" class="modal">
+    <div class="modal-content">
+        <h2><i class="fas fa-edit"></i> เพิ่มข้อมูลโปรเจค</h2>
+        <form id="addProjectForm" action="{{ url_for('add_project') }}" method="POST" enctype="multipart/form-data">
+            
+            <div class="form-group">
+                <label>5.1 ชื่อโปรเจค:</label>
+                <input type="text" name="name" required placeholder="กรอกชื่อโครงงาน">
+            </div>
+
+            <div class="form-group">
+                <label>5.2 ผู้รับผิดชอบ 1:</label>
+                <input type="text" name="author1" required placeholder="ชื่อ-นามสกุล">
+            </div>
+
+            <div class="form-group">
+                <label>5.3 ผู้รับผิดชอบ 2:</label>
+                <input type="text" name="author2" placeholder="ชื่อ-นามสกุล (ถ้าไม่มีให้เว้นว่างหรือใส่ -)">
+            </div>
+
+            <div class="form-group">
+                <label>5.4 ระดับชั้น:</label>
+                <select name="level">
+                    <option value="ปวช.1">ปวช. 1</option>
+                    <option value="ปวช.2">ปวช. 2</option>
+                    <option value="ปวช.3">ปวช. 3</option>
+                    <option value="ปวส.1">ปวส. 1</option>
+                    <option value="ปวส.2">ปวส. 2</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>5.5 รายละเอียดโปรเจค:</label>
+                <textarea name="description" rows="3" placeholder="อธิบายเกี่ยวกับโปรเจคสั้นๆ"></textarea>
+            </div>
+
+            <div class="form-group">
+                <label>5.6 ปีการศึกษา:</label>
+                <select id="year_select" name="year_select" onchange="toggleYearInput()">
+                    <option value="2568">ปีการศึกษา 2568</option>
+                    <option value="2569">ปีการศึกษา 2569</option>
+                    <option value="other">เพิ่มเติม...</option>
+                </select>
+                <div id="custom_year_div" style="display:none; margin-top:5px;">
+                    <input type="text" id="year_custom" name="year_custom" placeholder="กรอกปีการศึกษา เช่น 2570">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>5.7 ไฟล์เล่มโครงการ (PDF):</label>
+                <input type="file" name="file_report" accept=".pdf">
+            </div>
+
+            <div class="form-group">
+                <label>5.8 ไฟล์คู่มือ (PDF):</label>
+                <input type="file" name="file_manual" accept=".pdf">
+            </div>
+
+            <div class="form-group">
+                <label>5.9 ไฟล์โค้ด (Zip หรือ Link Github):</label>
+                <input type="text" name="github_link" placeholder="วางลิงค์ Github (ถ้ามี)">
+                <span style="font-size:0.8em; color:gray;">หรืออัพโหลดไฟล์ Zip ด้านล่าง</span>
+                <input type="file" name="file_code" accept=".zip,.rar">
+            </div>
+
+            <div class="btn-group">
+                <button type="button" class="btn-cancel" onclick="closeModal()">ยกเลิก</button>
+                <button type="submit" class="btn-confirm">ตกลง</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div style="margin-top: 3rem;">
+    <h3><i class="fas fa-history"></i> ประวัติการเพิ่มโปรเจคล่าสุด (5 รายการ)</h3>
+    <table>
+        <thead>
+            <tr>
+                <th>เวลา</th>
+                <th>กิจกรรม</th>
+                <th>รายละเอียด</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for log in logs %}
+            <tr>
+                <td>{{ log.timestamp.strftime('%d/%m/%Y %H:%M') }}</td>
+                <td><span style="color:var(--secondary-color); font-weight:bold;">{{ log.action }}</span></td>
+                <td>{{ log.details }}</td>
+            </tr>
+            {% else %}
+            <tr><td colspan="3" style="text-align:center;">ยังไม่มีประวัติ</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}
