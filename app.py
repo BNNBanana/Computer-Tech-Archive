@@ -4,17 +4,20 @@ from werkzeug.utils import secure_filename
 import os
 from datetime import datetime
 
-# 1. ตั้งค่าให้หาไฟล์ HTML ในโฟลเดอร์ปัจจุบัน (.)
-app = Flask(__name__, template_folder='.')
+# --- จุดแก้ไขสำคัญ (บรรทัดนี้คือหัวใจครับ) ---
+# template_folder='.'  => บอกว่าไฟล์ HTML อยู่ที่นี่
+# static_folder='.'    => บอกว่าไฟล์ CSS/JS ก็อยู่ที่นี่เหมือนกัน
+# static_url_path=''   => บอกว่าเวลาเรียกไฟล์ ให้เรียกจากหน้าบ้านเลย (เช่น /style.css ไม่ต้องมี /static นำหน้า)
+app = Flask(__name__, template_folder='.', static_folder='.', static_url_path='')
 
 app.secret_key = "secret_key_for_session" 
 
-# ตั้งค่า Database และ Path หลักของโปรเจค
+# ตั้งค่า Database
 BASE_DIR = os.path.abspath(os.path.dirname(__file__))
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(BASE_DIR, 'project_data.db')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
-# ตั้งค่าที่เก็บไฟล์ Upload (จะสร้างโฟลเดอร์ uploads แยกออกมาเอง)
+# ตั้งค่าที่เก็บไฟล์ Upload
 app.config['UPLOAD_FOLDER'] = os.path.join(BASE_DIR, 'uploads')
 ALLOWED_EXTENSIONS = {'pdf', 'zip', 'rar'}
 
@@ -57,25 +60,7 @@ def log_history(action, project_name):
     db.session.add(new_log)
     db.session.commit()
 
-# --- ROUTES พิเศษ (แก้ไขเรียบร้อยแล้ว!) ---
-# ใช้ BASE_DIR แทน '.' เพื่อให้ Server หาไฟล์เจอแน่นอน 100%
-
-@app.route('/style.css')
-def serve_css():
-    # ส่งไฟล์ style.css โดยอ้างอิงจากที่อยู่ไฟล์ app.py โดยตรง
-    return send_from_directory(BASE_DIR, 'style.css')
-
-@app.route('/script.js')
-def serve_js():
-    # ส่งไฟล์ script.js โดยอ้างอิงจากที่อยู่ไฟล์ app.py โดยตรง
-    return send_from_directory(BASE_DIR, 'script.js')
-
-@app.route('/uploads/<filename>')
-def download_file(filename):
-    # อันนี้ถูกต้องอยู่แล้ว (ใช้ app.config['UPLOAD_FOLDER'])
-    return send_from_directory(app.config['UPLOAD_FOLDER'], filename)
-
-# --- ROUTES ปกติ ---
+# --- ROUTES ---
 
 @app.route('/')
 def index():
@@ -143,6 +128,11 @@ def delete_project(id):
     log_history("ลบโปรเจค", name)
     flash('ลบข้อมูลเรียบร้อย', 'success')
     return redirect(url_for('projects'))
+
+# Route ดาวน์โหลดไฟล์ (ใช้ uploads เหมือนเดิม ถูกต้องแล้ว)
+@app.route('/uploads/<filename>')
+def download_file(filename):
+    return send_from_directory(app.config['UPLOAD_FOLDER'], filename)
 
 if __name__ == '__main__':
     with app.app_context():
